@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Química o la Vida! - Retro Arcade</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background: #000;
+            min-height: 100vh;
+            padding: 20px;
+            color: #0f0;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 0, 0.05) 0px,
+                rgba(0, 255, 0, 0.05) 2px,
+                transparent 2px,
+                transparent 4px
+            );
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.97; }
+            50% { opacity: 1; }
+            100% { opacity: 0.97; }
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
+            pointer-events: none;
+            z-index: 999;
+            animation: flicker 0.15s infinite;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .arcade-screen {
+            background: #111;
+            border: 8px solid #444;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 0, 0.3),
+                inset 0 0 100px rgba(0, 255, 0, 0.05),
+                0 10px 30px rgba(0, 0, 0, 0.8);
+            position: relative;
+        }
+
+        .arcade-screen::before {
+            content: "";
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 2px solid rgba(0, 255, 0, 0.2);
+            border-radius: 12px;
+            pointer-events: none;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-shadow: 
+                0 0 10px #0f0,
+                0 0 20px #0f0,
+                0 0 30px #0f0,
+                2px 2px 0px #050;
+            color: #0f0;
+            line-height: 1.5;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 10px #0f0, 0 0 20px #0f0, 0 0 30px #0f0, 2px 2px 0px #050; }
+            50% { text-shadow: 0 0 15px #0f0, 0 0 30px #0f0, 0 0 45px #0f0, 2px 2px 0px #050; }
+        }
+
+        .subtitle {
+            font-size: 10px;
+            color: #0aa;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+
+        .department {
+            font-size: 8px;
+            color: #088;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .tagline {
+            font-size: 11px;
+            margin-bottom: 30px;
+            color: #ff0;
+            text-shadow: 0 0 10px #ff0;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 49%, 100% { opacity: 1; }
+            50%, 99% { opacity: 0.3; }
+        }
+
+        .top-scores {
+            background: rgba(0, 100, 0, 0.3);
+            border: 3px solid #0f0;
+            padding: 20px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .top-scores::before {
+            content: "╔═══════════════════╗";
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #111;
+            padding: 0 10px;
+            color: #0f0;
+            font-size: 8px;
+        }
+
+        .top-scores h3 {
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #ff0;
+            text-shadow: 0 0 10px #ff0;
+        }
+
+        .score-item {
+            padding: 12px;
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid #0a0;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            transition: all 0.3s;
+        }
+
+        .score-item:hover {
+            background: rgba(0, 255, 0, 0.2);
+            border-color: #0f0;
+            transform: scale(1.02);
+        }
+
+        .score-name {
+            color: #0ff;
+            text-shadow: 0 0 5px #0ff;
+        }
+
+        .score-points {
+            background: rgba(255, 255, 0, 0.3);
+            padding: 6px 12px;
+            border: 2px solid #ff0;
+            color: #ff0;
+            text-shadow: 0 0 5px #ff0;
+        }
+
+        .btn {
+            background: linear-gradient(180deg, #0f0 0%, #0a0 100%);
+            color: #000;
+            padding: 15px 40px;
+            font-size: 12px;
+            border: 3px solid #0f0;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 0, 0.5),
+                inset 0 0 10px rgba(255, 255, 255, 0.2);
+            margin-bottom: 15px;
+            width: 100%;
+            transition: all 0.2s;
+            font-family: 'Press Start 2P', cursive;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+            position: relative;
+        }
+
+        .btn:hover {
+            background: linear-gradient(180deg, #0ff 0%, #0aa 100%);
+            border-color: #0ff;
+            box-shadow: 
+                0 0 30px rgba(0, 255, 255, 0.7),
+                inset 0 0 15px rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+            box-shadow: 
+                0 0 10px rgba(0, 255, 0, 0.3),
+                inset 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(180deg, #f0f 0%, #a0a 100%);
+            border-color: #f0f;
+            box-shadow: 
+                0 0 20px rgba(255, 0, 255, 0.5),
+                inset 0 0 10px rgba(255, 255, 255, 0.2);
+            padding: 12px 20px;
+            font-size: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(180deg, #ff0 0%, #aa0 100%);
+            border-color: #ff0;
+            box-shadow: 
+                0 0 30px rgba(255, 255, 0, 0.7),
+                inset 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .category-btn {
+            padding: 15px;
+            border: 3px solid #666;
+            background: linear-gradient(180deg, #333 0%, #111 100%);
+            cursor: pointer;
+            font-size: 9px;
+            transition: all 0.3s;
+            color: #888;
+            font-family: 'Press Start 2P', cursive;
+            text-shadow: 0 1px 0 #000;
+            line-height: 1.6;
+        }
+
+        .category-btn.selected {
+            border: 3px solid #0f0;
+            background: linear-gradient(180deg, #0a0 0%, #050 100%);
+            color: #0f0;
+            text-shadow: 0 0 10px #0f0;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            transform: scale(1.05);
+        }
+
+        .category-btn:hover {
+            border-color: #0ff;
+            color: #0ff;
+            text-shadow: 0 0 10px #0ff;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .setup-container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .setup-container h2 {
+            text-align: center;
+            color: #0f0;
+            margin-bottom: 20px;
+            font-size: 20px;
+            text-shadow: 0 0 20px #0f0;
+        }
+
+        .welcome-text {
+            text-align: center;
+            color: #0ff;
+            margin-bottom: 30px;
+            font-size: 10px;
+            text-shadow: 0 0 10px #0ff;
+        }
+
+        .setup-section {
+            margin-bottom: 30px;
+        }
+
+        .setup-section h3 {
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: #ff0;
+            text-shadow: 0 0 10px #ff0;
+        }
+
+        .difficulty-grid {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 15px;
+            border: 3px solid #666;
+            background: linear-gradient(180deg, #333 0%, #111 100%);
+            cursor: pointer;
+            font-size: 10px;
+            color: #888;
+            font-family: 'Press Start 2P', cursive;
+            transition: all 0.3s;
+        }
+
+        .difficulty-btn.selected {
+            border: 3px solid #ff0;
+            background: linear-gradient(180deg, #aa0 0%, #550 100%);
+            color: #ff0;
+            text-shadow: 0 0 10px #ff0;
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.5);
+        }
+
+        .difficulty-btn:hover {
+            border-color: #0ff;
+            color: #0ff;
+        }
+
+        .no-scores {
+            color: #666;
+            font-size: 10px;
+        }
+
+        .pixel-corner {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #0f0;
+        }
+
+        .pixel-corner.top-left {
+            top: 5px;
+            left: 5px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .pixel-corner.top-right {
+            top: 5px;
+            right: 5px;
+            border-left: none;
+            border-bottom: none;
+        }
+
+        .pixel-corner.bottom-left {
+            bottom: 5px;
+            left: 5px;
+            border-right: none;
+            border-top: none;
+        }
+
+        .pixel-corner.bottom-right {
+            bottom: 5px;
+            right: 5px;
+            border-left: none;
+            border-top: none;
+        }
+
+        @keyframes insertCoin {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .insert-coin {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            color: #ff0;
+            font-size: 10px;
+            animation: insertCoin 1s infinite;
+            text-shadow: 0 0 10px #ff0;
+            z-index: 1001;
+        }
+
+        /* Game Screen Styles */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 10px;
+        }
+
+        .game-stat {
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid #0f0;
+            padding: 8px 15px;
+            color: #0ff;
+            text-shadow: 0 0 5px #0ff;
+        }
+
+        .lives-display {
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px solid #f00;
+            padding: 8px 15px;
+            color: #f00;
+            text-shadow: 0 0 5px #f00;
+            font-size: 10px;
+        }
+
+        .login-screen {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .login-input {
+            background: #222;
+            border: 3px solid #0f0;
+            color: #0f0;
+            padding: 15px;
+            font-size: 12px;
+            font-family: 'Press Start 2P', cursive;
+            width: 100%;
+            margin: 15px 0;
+            text-align: center;
+            text-shadow: 0 0 5px #0f0;
+        }
+
+        .login-input:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+
+        .home-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(180deg, #f0f 0%, #a0a 100%);
+            border: 3px solid #f0f;
+            color: #fff;
+            padding: 10px 15px;
+            font-size: 10px;
+            cursor: pointer;
+            font-family: 'Press Start 2P', cursive;
+            z-index: 1002;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+        }
+
+        .home-btn:hover {
+            background: linear-gradient(180deg, #ff0 0%, #aa0 100%);
+            border-color: #ff0;
+        }
+
+        .admin-panel {
+            max-width: 900px;
+        }
+
+        .user-stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 9px;
+        }
+
+        .user-stats-table th,
+        .user-stats-table td {
+            border: 2px solid #0f0;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .user-stats-table th {
+            background: rgba(0, 255, 0, 0.3);
+            color: #ff0;
+            text-shadow: 0 0 10px #ff0;
+        }
+
+        .user-stats-table td {
+            background: rgba(0, 255, 0, 0.1);
+            color: #0ff;
+        }
+
+        .question-card {
+            background: rgba(0, 100, 0, 0.3);
+            border: 3px solid #0f0;
+            padding: 25px;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .question-text {
+            font-size: 16px;
+            color: #ff0;
+            margin-bottom: 20px;
+            line-height: 1.8;
+            text-shadow: 0 0 10px #ff0;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background: linear-gradient(180deg, #333 0%, #111 100%);
+            border: 3px solid #666;
+            color: #888;
+            padding: 18px;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: 'Press Start 2P', cursive;
+            text-align: left;
+            transition: all 0.3s;
+            line-height: 1.6;
+        }
+
+        .option-btn:hover {
+            border-color: #0ff;
+            color: #0ff;
+            background: linear-gradient(180deg, #0a0 0%, #050 100%);
+        }
+
+        .option-btn.correct {
+            border-color: #0f0;
+            background: linear-gradient(180deg, #0a0 0%, #050 100%);
+            color: #0f0;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+
+        .option-btn.incorrect {
+            border-color: #f00;
+            background: linear-gradient(180deg, #a00 0%, #500 100%);
+            color: #f00;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .feedback-box {
+            background: rgba(0, 255, 255, 0.2);
+            border: 3px solid #0ff;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 10px;
+            color: #0ff;
+            text-shadow: 0 0 5px #0ff;
+            line-height: 1.6;
+        }
+
+        /* Results Screen */
+        .results-container {
+            text-align: center;
+        }
+
+        .final-score {
+            font-size: 48px;
+            color: #ff0;
+            text-shadow: 0 0 20px #ff0;
+            margin: 30px 0;
+            animation: glow 2s infinite;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .stat-box {
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid #0f0;
+            padding: 15px;
+            font-size: 10px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            color: #0ff;
+            text-shadow: 0 0 10px #0ff;
+            margin-top: 10px;
+        }
+
+        .nickname-input {
+            background: #222;
+            border: 3px solid #0f0;
+            color: #0f0;
+            padding: 15px;
+            font-size: 12px;
+            font-family: 'Press Start 2P', cursive;
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+            text-align: center;
+            text-shadow: 0 0 5px #0f0;
+        }
+
+        .nickname-input:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 18px;
+            }
+            
+            .category-grid {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            }
+
+            .btn {
+                font-size: 10px;
+                padding: 12px 30px;
+            }
+
+            .difficulty-btn {
+                font-size: 8px;
+                min-width: 90px;
+            }
+
+            .game-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .question-text {
+                font-size: 10px;
+            }
+
+            .option-btn {
+                font-size: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="insert-coin">INSERT COIN</div>
+
+    <!-- LOGIN SCREEN -->
+    <div class="container login-screen" id="loginScreen">
+        <div class="arcade-screen">
+            <div class="pixel-corner top-left"></div>
+            <div class="pixel-corner top-right"></div>
+            <div class="pixel-corner bottom-left"></div>
+            <div class="pixel-corner bottom-right"></div>
+
+            <h1>🧪 LA QUIMICA<br>O LA VIDA! 🧪</h1>
+            <p class="subtitle">IDENTIFICA'T PER COMENÇAR</p>
+
+            <input type="email" class="login-input" id="emailInput" placeholder="EMAIL">
+            <input type="text" class="login-input" id="nicknameLoginInput" placeholder="NICKNAME">
+
+            <button class="btn" onclick="login()">
+                🔐 ENTRAR
+            </button>
+
+            <p class="welcome-text" style="margin-top: 20px;">
+                Si ja has jugat abans,<br>només cal el teu email
+            </p>
+        </div>
+    </div>
+
+    <!-- SPLASH SCREEN -->
+    <div class="container hidden" id="splashScreen">
+        <div class="arcade-screen">
+            <div class="pixel-corner top-left"></div>
+            <div class="pixel-corner top-right"></div>
+            <div class="pixel-corner bottom-left"></div>
+            <div class="pixel-corner bottom-right"></div>
+
+            <h1>🧪 LA QUIMICA<br>O LA VIDA! 🧪</h1>
+            <p class="subtitle">IES DISTRICTE MARÍTIM</p>
+            <p class="department">DEPARTAMENT DE FÍSICA I QUÍMICA</p>
+            <p class="tagline">PREPARA'T PER POSAR A PROVA<br>ELS TEUS CONEIXEMENTS</p>
+
+            <div class="top-scores">
+                <h3>🏆 TOP 5 PUNTUACIONS 🏆</h3>
+                <div id="scoresList">
+                    <p class="no-scores">ENCARA NO HI HA PUNTUACIONS</p>
+                </div>
+            </div>
+
+            <button class="btn" onclick="goToSetup()">
+                🎮 COMENÇAR
+            </button>
+
+            <button class="btn btn-secondary" onclick="showScores()">
+                🏆 VEURE RANKING
+            </button>
+
+            <button class="btn btn-secondary" onclick="showTheory()">
+                📖 APUNTS
+            </button>
+
+            <button class="btn btn-secondary" onclick="logout()">
+                🚪 TANCAR SESSIO
+            </button>
+        </div>
+    </div>
+
+    <!-- SETUP SCREEN -->
+    <div id="setupScreen" class="hidden">
+        <div class="setup-container">
+            <div class="arcade-screen">
+                <div class="pixel-corner top-left"></div>
+                <div class="pixel-corner top-right"></div>
+                <div class="pixel-corner bottom-left"></div>
+                <div class="pixel-corner bottom-right"></div>
+
+                <h2>⚙️ CONFIGURACIO DEL JOC ⚙️</h2>
+                <p class="welcome-text">
+                    BENVINGUT/DA, <strong>JUGADOR</strong>!
+                </p>
+
+                <div class="setup-section">
+                    <h3>📚 SELECCIONA CATEGORIES:</h3>
+                    <div class="category-grid" id="categoryGrid">
+                        <button class="category-btn" onclick="toggleCategory(this)" data-category="ALCANOS">⛓️<br>ALCANOS</button>
+                        <button class="category-btn" onclick="toggleCategory(this)" data-category="ALQUENOS">🔗<br>ALQUENOS</button>
+                        <button class="category-btn" onclick="toggleCategory(this)" data-category="ALQUINS">≡<br>ALQUINS</button>
+                        <button class="category-btn" onclick="toggleCategory(this)" data-category="ALCOHOLS">🍷<br>ALCOHOLS</button>
+                        <button class="category-btn" onclick="toggleCategory(this)" data-category="ETERES">🔬<br>ETERES</button>
+                        <button class="category-btn" onclick="toggleCategory(this)" data-category="ALDEHIDS">🧪<br>ALDEHIDS</button>
+                        <button class="category-btn" onclick="toggleCategory(this)" data-category="CETONES">⚗️<br>CETONES</button>
+                        <button class="category-btn" onclick="toggleCategory(this)" data-category="ACIDS">🧬<br>ACIDS</button>
+                        <button class="category-btn" onclick="toggleCategory(this)" data-category="ESTERS">💧<br>ESTERS</button>
+                        <button class="category-btn" onclick="toggleCategory(this)" data-category="AMINES">🔋<br>AMINES</button>
+                        <button class="category-btn" onclick="toggleCategory(this)" data-category="AROMATICS">⬡<br>AROMATICS</button>
+                        <button class="category-btn" onclick="toggleCategory(this)" data-category="CICLICS">⭕<br>CICLICS</button>
+                    </div>
+                    <button class="btn" style="background: linear-gradient(180deg, #0a0 0%, #050 100%); font-size: 10px; padding: 12px;" onclick="selectAllCategories()">
+                        ✓ SELECCIONAR TOTES
+                    </button>
+                </div>
+
+                <div class="setup-section">
+                    <h3>🎯 DIFICULTAT:</h3>
+                    <div class="difficulty-grid">
+                        <button class="difficulty-btn" onclick="selectDifficulty(this)" data-difficulty="FACIL">😊<br>FACIL</button>
+                        <button class="difficulty-btn selected" onclick="selectDifficulty(this)" data-difficulty="MITJA">🤔<br>MITJA</button>
+                        <button class="difficulty-btn" onclick="selectDifficulty(this)" data-difficulty="DIFICIL">🔥<br>DIFICIL</button>
+                    </div>
+                </div>
+
+                <div class="setup-section">
+                    <h3>🔢 NOMBRE DE PREGUNTES:</h3>
+                    <div class="difficulty-grid">
+                        <button class="difficulty-btn" onclick="selectQuestions(this)" data-count="5">5</button>
+                        <button class="difficulty-btn selected" onclick="selectQuestions(this)" data-count="10">10</button>
+                        <button class="difficulty-btn" onclick="selectQuestions(this)" data-count="15">15</button>
+                        <button class="difficulty-btn" onclick="selectQuestions(this)" data-count="20">20</button>
+                    </div>
+                </div>
+
+                <button class="btn" style="flex: 2; min-width: 200px;" onclick="startGame()">
+                    🚀 COMENÇAR JOC
+                </button>
+
+                <button class="btn btn-secondary" onclick="backToSplash()">
+                    ← TORNAR
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="gameScreen" class="hidden">
+        <div class="container">
+            <div class="arcade-screen">
+                <div class="pixel-corner top-left"></div>
+                <div class="pixel-corner top-right"></div>
+                <div class="pixel-corner bottom-left"></div>
+                <div class="pixel-corner bottom-right"></div>
+
+                <div class="game-header">
+                    <div class="game-stat">PREGUNTA: <span id="currentQuestion">1</span>/<span id="totalQuestions">10</span></div>
+                    <div class="game-stat">PUNTUACIO: <span id="currentScore">0</span></div>
+                    <div class="lives-display">VIDES: <span id="livesDisplay">❤️❤️❤️</span></div>
+                    <div class="game-stat">TEMPS: <span id="timer">30</span>s</div>
+                </div>
+
+                <div class="question-card">
+                    <div class="question-text" id="questionText"></div>
+                    <div class="options-grid" id="optionsGrid"></div>
+                    <div id="feedbackBox" class="feedback-box hidden"></div>
+                </div>
+
+                <button class="btn" id="nextButton" onclick="nextQuestion()" style="display: none;">
+                    ➡️ SEGUENT PREGUNTA
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESULTS SCREEN -->
+    <div id="resultsScreen" class="hidden">
+        <div class="container">
+            <div class="arcade-screen">
+                <div class="pixel-corner top-left"></div>
+                <div class="pixel-corner top-right"></div>
+                <div class="pixel-corner bottom-left"></div>
+                <div class="pixel-corner bottom-right"></div>
+
+                <h2 style="color: #0f0; text-shadow: 0 0 20px #0f0; margin-bottom: 20px;">🎮 PARTIDA ACABADA! 🎮</h2>
+
+                <div class="final-score" id="finalScore">0 PUNTS</div>
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div>CORRECTES</div>
+                        <div class="stat-value" id="correctCount">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div>INCORRECTES</div>
+                        <div class="stat-value" id="incorrectCount">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div>PRECISIO</div>
+                        <div class="stat-value" id="accuracy">0%</div>
+                    </div>
+                </div>
+
+                <input type="text" class="nickname-input" id="nicknameInput" placeholder="ESCRIU EL TEU NOM" maxlength="20">
+
+                <button class="btn" onclick="saveScore()">
+                    💾 GUARDAR PUNTUACIO
+                </button>
+
+                <button class="btn btn-secondary" onclick="backToSplash()">
+                    ← TORNAR AL MENU
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div id="adminScreen" class="hidden">
+        <div class="container admin-panel">
+            <div class="arcade-screen">
+                <div class="pixel-corner top-left"></div>
+                <div class="pixel-corner top-right"></div>
+                <div class="pixel-corner bottom-left"></div>
+                <div class="pixel-corner bottom-right"></div>
+
+                <h2 style="color: #0f0; text-shadow: 0 0 20px #0f0; margin-bottom: 20px;">👤 PANEL D'ADMINISTRACIO</h2>
+
+                <p class="welcome-text">ESTADISTIQUES D'USUARIS</p>
+
+                <table class="user-stats-table">
+                    <thead>
+                        <tr>
+                            <th>EMAIL</th>
+                            <th>NICKNAME</th>
+                            <th>PARTIDES</th>
+                            <th>MILLOR PUNTUACIO</th>
+                            <th>DATA REGISTRE</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userStatsBody">
+                    </tbody>
+                </table>
+
+                <button class="btn btn-secondary" onclick="backToSplash()">
+                    ← TORNAR
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <button class="home-btn" id="homeButton" onclick="goHome()" style="display: none;">
+        🏠 INICI
+    </button>
+
+    <!-- THEORY SCREEN -->
+    <div id="theoryScreen" class="hidden">
+        <div class="container" style="max-width: 1000px;">
+        <div class="arcade-screen">
+            <div class="pixel-corner top-left"></div>
+            <div class="pixel-corner top-right"></div>
+            <div class="pixel-corner bottom-left"></div>
+            <div class="pixel-corner bottom-right"></div>
+
+            <h2 style="color: #0f0; text-shadow: 0 0 20px #0f0; margin-bottom: 20px;">📖 APUNTS DE QUIMICA ORGANICA</h2>
+            <p class="subtitle" style="margin-bottom: 30px;">4t ESO • Nomenclatura i Formulació</p>
+
+            <div style="max-height: 70vh; overflow-y: auto; text-align: left; padding: 20px; background: rgba(0, 100, 0, 0.2); border: 2px solid #0a0;">
+                
+                <!-- Prefixos -->
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #ff0; text-shadow: 0 0 10px #ff0; margin-bottom: 15px; font-size: 14px;">📊 PREFIXOS SEGONS CARBONIS</h3>
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 11px;">
+                        <tr style="background: rgba(0, 255, 0, 0.3);">
+                            <th style="border: 2px solid #0f0; padding: 10px; color: #0ff;">Nº Carbonis</th>
+                            <th style="border: 2px solid #0f0; padding: 10px; color: #0ff;">Prefix</th>
+                        </tr>
+                        <tr><td style="border: 2px solid #0a0; padding: 8px; color: #0ff;">1</td><td style="border: 2px solid #0a0; padding: 8px; color: #0f0;">met-</td></tr>
+                        <tr><td style="border: 2px solid #0a0; padding: 8px; color: #0ff;">2</td><td style="border: 2px solid #0a0; padding: 8px; color: #0f0;">et-</td></tr>
+                        <tr><td style="border: 2px solid #0a0; padding: 8px; color: #0ff;">3</td><td style="border: 2px solid #0a0; padding: 8px; color: #0f0;">prop-</td></tr>
+                        <tr><td style="border: 2px solid #0a0; padding: 8px; color: #0ff;">4</td><td style="border: 2px solid #0a0; padding: 8px; color: #0f0;">but-</td></tr>
+                        <tr><td style="border: 2px solid #0a0; padding: 8px; color: #0ff;">5</td><td style="border: 2px solid #0a0; padding: 8px; color: #0f0;">pent-</td></tr>
+                        <tr><td style="border: 2px solid #0a0; padding: 8px; color: #0ff;">6</td><td style="border: 2px solid #0a0; padding: 8px; color: #0f0;">hex-</td></tr>
+                        <tr><td style="border: 2px solid #0a0; padding: 8px; color: #0ff;">7</td><td style="border: 2px solid #0a0; padding: 8px; color: #0f0;">hept-</td></tr>
+                        <tr><td style="border: 2px solid #0a0; padding: 8px; color: #0ff;">8</td><td style="border: 2px solid #0a0; padding: 8px; color: #0f0;">oct-</td></tr>
+                    </table>
+                </div>
+
+                <!-- Alcanos -->
+                <div style="margin-bottom: 30px; padding: 15px; background: rgba(0, 255, 0, 0.1); border: 2px solid #0f0;">
+                    <h3 style="color: #ff0; text-shadow: 0 0 10px #ff0; margin-bottom: 15px; font-size: 14px;">⛓️ ALCANOS</h3>
+                    <p style="color: #0ff; margin-bottom: 10px; font-size: 11px; line-height: 1.6;">
+                        Només enllaços simples C-C<br>
+                        Fórmula general: <span style="color: #0f0; font-size: 16px; font-weight: bold;">CₙH₂ₙ₊₂</span><br>
+                        Terminació: <span style="color: #0f0; font-weight: bold;">-à</span>
+                    </p>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">CH₃-CH₂-CH₃</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ Propà</p>
+                    </div>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">CH₃-CH(CH₃)-CH₂-CH₃</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ 2-metilbutà</p>
+                    </div>
+                </div>
+
+                <!-- Alquens -->
+                <div style="margin-bottom: 30px; padding: 15px; background: rgba(0, 255, 0, 0.1); border: 2px solid #0f0;">
+                    <h3 style="color: #ff0; text-shadow: 0 0 10px #ff0; margin-bottom: 15px; font-size: 14px;">🔗 ALQUENS</h3>
+                    <p style="color: #0ff; margin-bottom: 10px; font-size: 11px; line-height: 1.6;">
+                        Un enllaç doble C=C<br>
+                        Fórmula general: <span style="color: #0f0; font-size: 16px; font-weight: bold;">CₙH₂ₙ</span><br>
+                        Terminació: <span style="color: #0f0; font-weight: bold;">-è/-eno</span>
+                    </p>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">CH₂=CH-CH₃</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ Propè / Propeno</p>
+                    </div>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">CH₃-CH=CH-CH₃</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ But-2-è / 2-buteno</p>
+                    </div>
+                </div>
+
+                <!-- Alquins -->
+                <div style="margin-bottom: 30px; padding: 15px; background: rgba(0, 255, 0, 0.1); border: 2px solid #0f0;">
+                    <h3 style="color: #ff0; text-shadow: 0 0 10px #ff0; margin-bottom: 15px; font-size: 14px;">≡ ALQUINS</h3>
+                    <p style="color: #0ff; margin-bottom: 10px; font-size: 11px; line-height: 1.6;">
+                        Un enllaç triple C≡C<br>
+                        Fórmula general: <span style="color: #0f0; font-size: 16px; font-weight: bold;">CₙH₂ₙ₋₂</span><br>
+                        Terminació: <span style="color: #0f0; font-weight: bold;">-í/-ino</span>
+                    </p>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">HC≡CH</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ Etí / Etino (acetilè)</p>
+                    </div>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">CH₃-C≡C-CH₃</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ But-2-í / 2-butino</p>
+                    </div>
+                </div>
+
+                <!-- Alcohols -->
+                <div style="margin-bottom: 30px; padding: 15px; background: rgba(0, 255, 0, 0.1); border: 2px solid #0f0;">
+                    <h3 style="color: #ff0; text-shadow: 0 0 10px #ff0; margin-bottom: 15px; font-size: 14px;">🍷 ALCOHOLS</h3>
+                    <p style="color: #0ff; margin-bottom: 10px; font-size: 11px; line-height: 1.6;">
+                        Grup hidroxil: <span style="color: #0f0; font-size: 16px; font-weight: bold;">-OH</span><br>
+                        Terminació: <span style="color: #0f0; font-weight: bold;">-ol</span>
+                    </p>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">CH₃-OH</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ Metanol</p>
+                    </div>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">CH₃-CH₂-OH</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ Etanol</p>
+                    </div>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">CH₃-CHOH-CH₃</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ Propan-2-ol</p>
+                    </div>
+                </div>
+
+                <!-- Èters -->
+                <div style="margin-bottom: 30px; padding: 15px; background: rgba(0, 255, 0, 0.1); border: 2px solid #0f0;">
+                    <h3 style="color: #ff0; text-shadow: 0 0 10px #ff0; margin-bottom: 15px; font-size: 14px;">🔬 ÈTERS</h3>
+                    <p style="color: #0ff; margin-bottom: 10px; font-size: 11px; line-height: 1.6;">
+                        Oxigen entre dos carbonis: <span style="color: #0f0; font-size: 16px; font-weight: bold;">R-O-R'</span><br>
+                        Terminació: <span style="color: #0f0; font-weight: bold;">-oxi-</span>
+                    </p>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">CH₃-O-CH₃</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ Metoximetà (dimetil èter)</p>
+                    </div>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">CH₃-O-CH₂-CH₃</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ Metoxietà (etil metil èter)</p>
+                    </div>
+                </div>
+
+                <!-- Aldehids -->
+                <div style="margin-bottom: 30px; padding: 15px; background: rgba(0, 255, 0, 0.1); border: 2px solid #0f0;">
+                    <h3 style="color: #ff0; text-shadow: 0 0 10px #ff0; margin-bottom: 15px; font-size: 14px;">🧪 ALDEHIDS</h3>
+                    <p style="color: #0ff; margin-bottom: 10px; font-size: 11px; line-height: 1.6;">
+                        Grup carbonil al final: <span style="color: #0f0; font-size: 16px; font-weight: bold;">-CHO</span><br>
+                        Terminació: <span style="color: #0f0; font-weight: bold;">-al</span>
+                    </p>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">H-CHO</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ Metanal (formaldehid)</p>
+                    </div>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">CH₃-CHO</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ Etanal (acetaldehid)</p>
+                    </div>
+                </div>
+
+                <!-- Cetones -->
+                <div style="margin-bottom: 30px; padding: 15px; background: rgba(0, 255, 0, 0.1); border: 2px solid #0f0;">
+                    <h3 style="color: #ff0; text-shadow: 0 0 10px #ff0; margin-bottom: 15px; font-size: 14px;">⚗️ CETONES</h3>
+                    <p style="color: #0ff; margin-bottom: 10px; font-size: 11px; line-height: 1.6;">
+                        Grup carbonil interior: <span style="color: #0f0; font-size: 16px; font-weight: bold;">-CO-</span><br>
+                        Terminació: <span style="color: #0f0; font-weight: bold;">-ona</span>
+                    </p>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">CH₃-CO-CH₃</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ Propanona (acetona)</p>
+                    </div>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">CH₃-CO-CH₂-CH₃</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ Butanona</p>
+                    </div>
+                </div>
+
+                <!-- Àcids -->
+                <div style="margin-bottom: 30px; padding: 15px; background: rgba(0, 255, 0, 0.1); border: 2px solid #0f0;">
+                    <h3 style="color: #ff0; text-shadow: 0 0 10px #ff0; margin-bottom: 15px; font-size: 14px;">🧬 ÀCIDS CARBOXÍLICS</h3>
+                    <p style="color: #0ff; margin-bottom: 10px; font-size: 11px; line-height: 1.6;">
+                        Grup carboxil: <span style="color: #0f0; font-size: 16px; font-weight: bold;">-COOH</span><br>
+                        Terminació: <span style="color: #0f0; font-weight: bold;">àcid ...-oic</span>
+                    </p>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">H-COOH</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ Àcid metanoic (fòrmic)</p>
+                    </div>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">CH₃-COOH</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ Àcid etanoic (acètic)</p>
+                    </div>
+                </div>
+
+                <!-- Èsters -->
+                <div style="margin-bottom: 30px; padding: 15px; background: rgba(0, 255, 0, 0.1); border: 2px solid #0f0;">
+                    <h3 style="color: #ff0; text-shadow: 0 0 10px #ff0; margin-bottom: 15px; font-size: 14px;">💧 ÈSTERS</h3>
+                    <p style="color: #0ff; margin-bottom: 10px; font-size: 11px; line-height: 1.6;">
+                        Derivat d'àcid + alcohol: <span style="color: #0f0; font-size: 16px; font-weight: bold;">-COO-</span><br>
+                        Terminació: <span style="color: #0f0; font-weight: bold;">...-oat de ...-il</span>
+                    </p>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">CH₃-COO-CH₃</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ Etanoat de metil</p>
+                    </div>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">H-COO-CH₂-CH₃</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ Metanoat d'etil</p>
+                    </div>
+                </div>
+
+                <!-- Amines -->
+                <div style="margin-bottom: 30px; padding: 15px; background: rgba(0, 255, 0, 0.1); border: 2px solid #0f0;">
+                    <h3 style="color: #ff0; text-shadow: 0 0 10px #ff0; margin-bottom: 15px; font-size: 14px;">🔋 AMINES</h3>
+                    <p style="color: #0ff; margin-bottom: 10px; font-size: 11px; line-height: 1.6;">
+                        Grup amino: <span style="color: #0f0; font-size: 16px; font-weight: bold;">-NH₂</span><br>
+                        Terminació: <span style="color: #0f0; font-weight: bold;">...-amina</span>
+                    </p>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">CH₃-NH₂</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ Metilamina</p>
+                    </div>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">CH₃-CH₂-NH₂</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ Etilamina</p>
+                    </div>
+                </div>
+
+                <!-- Aromàtics -->
+                <div style="margin-bottom: 30px; padding: 15px; background: rgba(0, 255, 0, 0.1); border: 2px solid #0f0;">
+                    <h3 style="color: #ff0; text-shadow: 0 0 10px #ff0; margin-bottom: 15px; font-size: 14px;">⬡ COMPOSTOS AROMÀTICS</h3>
+                    <p style="color: #0ff; margin-bottom: 10px; font-size: 11px; line-height: 1.6;">
+                        Anell benzènic: <span style="color: #0f0; font-size: 16px; font-weight: bold;">C₆H₆</span><br>
+                        Base: <span style="color: #0f0; font-weight: bold;">benzè / fenil-</span>
+                    </p>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">C₆H₆</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ Benzè</p>
+                    </div>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">C₆H₅-CH₃</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ Metilbenzè (toluè)</p>
+                    </div>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">C₆H₅-OH</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ Hidroxibenzè (fenol)</p>
+                    </div>
+                </div>
+
+                <!-- Cíclics -->
+                <div style="margin-bottom: 30px; padding: 15px; background: rgba(0, 255, 0, 0.1); border: 2px solid #0f0;">
+                    <h3 style="color: #ff0; text-shadow: 0 0 10px #ff0; margin-bottom: 15px; font-size: 14px;">⭕ COMPOSTOS CÍCLICS</h3>
+                    <p style="color: #0ff; margin-bottom: 10px; font-size: 11px; line-height: 1.6;">
+                        Cadenes tancades<br>
+                        Prefix: <span style="color: #0f0; font-weight: bold;">ciclo-</span>
+                    </p>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">C₃H₆ (triangle)</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ Ciclopropà</p>
+                    </div>
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 15px; border: 2px solid #0a0; margin: 10px 0;">
+                        <p style="color: #0f0; font-size: 16px; font-family: monospace; margin-bottom: 5px;">C₆H₁₂ (hexàgon)</p>
+                        <p style="color: #ff0; font-size: 12px;">➜ Ciclohexà</p>
+                    </div>
+                </div>
+
+                <!-- Regles de prioritat -->
+                <div style="margin-bottom: 30px; padding: 15px; background: rgba(255, 255, 0, 0.2); border: 2px solid #ff0;">
+                    <h3 style="color: #f0f; text-shadow: 0 0 10px #f0f; margin-bottom: 15px; font-size: 14px;">🎯 PRIORITAT DELS GRUPS FUNCIONALS</h3>
+                    <p style="color: #fff; font-size: 11px; line-height: 1.8;">
+                        Quan hi ha més d'un grup funcional, s'ordenen per prioritat:<br><br>
+                        <span style="color: #ff0;">1. Àcids carboxílics (-COOH)</span><br>
+                        <span style="color: #ff0;">2. Èsters (-COO-)</span><br>
+                        <span style="color: #ff0;">3. Aldehids (-CHO)</span><br>
+                        <span style="color: #ff0;">4. Cetones (-CO-)</span><br>
+                        <span style="color: #ff0;">5. Alcohols (-OH)</span><br>
+                        <span style="color: #ff0;">6. Amines (-NH₂)</span><br>
+                        <span style="color: #ff0;">7. Alquins (triple enllaç)</span><br>
+                        <span style="color: #ff0;">8. Alquens (doble enllaç)</span><br>
+                        <span style="color: #ff0;">9. Alcans (enllaços simples)</span>
+                    </p>
+                </div>
+
+            </div>
+
+            <button class="btn btn-secondary" onclick="backToSplash()">
+                ← TORNAR AL MENU
+            </button>
+        </div>
+        </div>
+    </div>
+
+    <button class="home-btn" id="homeButton" onclick="goHome()" style="display: none;">
+        🏠 INICI
+    </button>
+
+    <script>
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playBeep(frequency = 440, duration = 100) {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'square';
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration / 1000);
+        }
+
+        // Game State
+        let gameState = {
+            selectedCategories: [],
+            difficulty: 'MITJA',
+            questionCount: 10,
+            currentQuestionIndex: 0,
+            score: 0,
+            correctAnswers: 0,
+            incorrectAnswers: 0,
+            questions: [],
+            timer: null,
+            timeLeft: 30,
+            lives: 3,
+            currentUser: null
+        };
+
+        const ADMIN_EMAIL = 'p.fenollosaalcaina@edu.gva.es';
+
+        // Questions Database - Complete with all categories
+        const questionsDB = {
+            ALCANOS: [
+                { q: "Quin és el nom del CH₄?", a: ["Metà", "Età", "Propà", "Butà"], correct: 0, difficulty: "FACIL" },
+                { q: "Quina és la fórmula general dels alcanos?", a: ["CₙH₂ₙ₊₂", "CₙH₂ₙ", "CₙH₂ₙ₋₂", "CₙHₙ"], correct: 0, difficulty: "FACIL" },
+                { q: "Quin tipus d'enllaç tenen els alcanos?", a: ["Enllaç simple C-C", "Enllaç doble C=C", "Enllaç triple C≡C", "Enllaç iònic"], correct: 0, difficulty: "FACIL" },
+                { q: "Quin és el nom del C₃H₈?", a: ["Propà", "Età", "Metà", "Butà"], correct: 0, difficulty: "FACIL" },
+                { q: "Quina fórmula té l'età?", a: ["C₂H₆", "CH₄", "C₃H₈", "C₄H₁₀"], correct: 0, difficulty: "FACIL" },
+                { q: "Com s'anomena el C₅H₁₂?", a: ["Pentà", "Butà", "Hexà", "Heptà"], correct: 0, difficulty: "FACIL" },
+                { q: "Els alcanos són hidrocarburs...", a: ["Saturats", "Insaturats", "Aromàtics", "Polars"], correct: 0, difficulty: "MITJA" },
+                { q: "Quin és el nom del C₄H₁₀?", a: ["Butà", "Propà", "Pentà", "Hexà"], correct: 0, difficulty: "MITJA" },
+                { q: "El pentà té quants àtoms de carboni?", a: ["5", "4", "6", "3"], correct: 0, difficulty: "MITJA" },
+                { q: "Quin alcà té 6 àtoms de carboni?", a: ["Hexà", "Pentà", "Heptà", "Octà"], correct: 0, difficulty: "MITJA" },
+                { q: "La combustió dels alcanos produeix:", a: ["CO₂ i H₂O", "CO i H₂", "C i H₂O", "CH₄ i O₂"], correct: 0, difficulty: "DIFICIL" },
+                { q: "Els alcanos són compostos:", a: ["Apolars", "Polars", "Iònics", "Metàl·lics"], correct: 0, difficulty: "DIFICIL" },
+            ],
+            ALQUENOS: [
+                { q: "Quina és la fórmula general dels alquens?", a: ["CₙH₂ₙ", "CₙH₂ₙ₊₂", "CₙH₂ₙ₋₂", "CₙHₙ"], correct: 0, difficulty: "FACIL" },
+                { q: "Quin tipus d'enllaç caracteritza els alquens?", a: ["Doble enllaç C=C", "Enllaç simple C-C", "Triple enllaç C≡C", "Enllaç aromàtic"], correct: 0, difficulty: "FACIL" },
+                { q: "Quin és el nom del C₂H₄?", a: ["Etè (Etilè)", "Età", "Propè", "Butè"], correct: 0, difficulty: "FACIL" },
+                { q: "Quina fórmula té el butè?", a: ["C₄H₈", "C₄H₁₀", "C₄H₆", "C₃H₆"], correct: 0, difficulty: "FACIL" },
+                { q: "Els alquens tenen quants enllaços dobles mínim?", a: ["1", "2", "3", "0"], correct: 0, difficulty: "FACIL" },
+                { q: "Els alquens són hidrocarburs...", a: ["Insaturats", "Saturats", "Aromàtics", "Cíclics"], correct: 0, difficulty: "MITJA" },
+                { q: "Quina reacció és característica dels alquens?", a: ["Addició", "Substitució", "Eliminació", "Condensació"], correct: 0, difficulty: "MITJA" },
+                { q: "El propè té la fórmula:", a: ["C₃H₆", "C₃H₈", "C₃H₄", "C₂H₄"], correct: 0, difficulty: "MITJA" },
+                { q: "Quina hibridació tenen els carbonis del doble enllaç?", a: ["sp²", "sp", "sp³", "sp³d"], correct: 0, difficulty: "DIFICIL" },
+                { q: "La hidrogenació d'un alquè produeix:", a: ["Alcà", "Alquí", "Alcohol", "Aldehid"], correct: 0, difficulty: "DIFICIL" },
+                { q: "Els alquens poden presentar isomeria:", a: ["Geomètrica (cis-trans)", "Òptica", "De cadena", "De posició"], correct: 0, difficulty: "DIFICIL" },
+                { q: "L'addició d'aigua a un alquè produeix:", a: ["Alcohol", "Aldehid", "Cetona", "Èter"], correct: 0, difficulty: "DIFICIL" },
+            ],
+            ALQUINS: [
+                { q: "Quina és la fórmula general dels alquins?", a: ["CₙH₂ₙ₋₂", "CₙH₂ₙ", "CₙH₂ₙ₊₂", "CₙHₙ"], correct: 0, difficulty: "FACIL" },
+                { q: "Quin tipus d'enllaç tenen els alquins?", a: ["Triple enllaç C≡C", "Doble enllaç C=C", "Enllaç simple C-C", "Enllaç iònic"], correct: 0, difficulty: "FACIL" },
+                { q: "Quin és el nom del C₂H₂?", a: ["Etí (Acetilè)", "Età", "Propí", "Butí"], correct: 0, difficulty: "FACIL" },
+                { q: "Quina fórmula té el butí?", a: ["C₄H₆", "C₄H₈", "C₄H₁₀", "C₃H₄"], correct: 0, difficulty: "FACIL" },
+                { q: "L'acetilè té quants carbonis?", a: ["2", "3", "4", "1"], correct: 0, difficulty: "FACIL" },
+                { q: "Els alquins són més reactius que els alcanos perquè...", a: ["Tenen enllaços triples", "Tenen enllaços simples", "Són cíclics", "Són aromàtics"], correct: 0, difficulty: "MITJA" },
+                { q: "Quina hibridació té el carboni en els alquins?", a: ["sp", "sp²", "sp³", "sp³d"], correct: 0, difficulty: "DIFICIL" },
+                { q: "El propí té la fórmula:", a: ["C₃H₄", "C₃H₆", "C₃H₈", "C₂H₂"], correct: 0, difficulty: "MITJA" },
+                { q: "L'acetilè s'utilitza en:", a: ["Soldadura", "Cuina", "Medicina", "Neteja"], correct: 0, difficulty: "MITJA" },
+                { q: "Els alquins terminals tenen un hidrogen àcid en:", a: ["Carboni triple enllaç", "Carboni simple enllaç", "Tots els carbonis", "Cap carboni"], correct: 0, difficulty: "DIFICIL" },
+                { q: "L'addició d'hidrogen a un alquí produeix:", a: ["Alcà", "Alquè", "Alcohol", "Aldehid"], correct: 0, difficulty: "DIFICIL" },
+                { q: "Els alquins reaccionen amb aigua en presència de:", a: ["Catalitzador àcid", "Base forta", "Oxigen", "Nitrogen"], correct: 0, difficulty: "DIFICIL" },
+            ],
+            ALCOHOLS: [
+                { q: "Quin grup funcional tenen els alcohols?", a: ["-OH (hidroxil)", "-CHO (aldehid)", "-COOH (carboxil)", "-NH₂ (amino)"], correct: 0, difficulty: "FACIL" },
+                { q: "Quin és el nom del CH₃OH?", a: ["Metanol", "Etanol", "Propanol", "Butanol"], correct: 0, difficulty: "FACIL" },
+                { q: "L'etanol (alcohol etílic) té la fórmula:", a: ["C₂H₅OH", "CH₃OH", "C₃H₇OH", "C₄H₉OH"], correct: 0, difficulty: "FACIL" },
+                { q: "Quin alcohol té 3 carbonis?", a: ["Propanol", "Etanol", "Metanol", "Butanol"], correct: 0, difficulty: "FACIL" },
+                { q: "L'alcohol de les begudes és:", a: ["Etanol", "Metanol", "Propanol", "Butanol"], correct: 0, difficulty: "FACIL" },
+                { q: "Els alcohols primaris tenen el grup -OH unit a un carboni amb:", a: ["Un àtom de C", "Dos àtoms de C", "Tres àtoms de C", "Cap àtom de C"], correct: 0, difficulty: "MITJA" },
+                { q: "L'oxidació d'un alcohol primari produeix:", a: ["Aldehid", "Cetona", "Èter", "Èster"], correct: 0, difficulty: "DIFICIL" },
+                { q: "El propanol té quants carbonis?", a: ["3", "2", "4", "5"], correct: 0, difficulty: "FACIL" },
+                { q: "Els alcohols secundaris s'oxiden a:", a: ["Cetones", "Aldehids", "Àcids", "Èsters"], correct: 0, difficulty: "MITJA" },
+                { q: "El glicerol (glicerina) té quants grups -OH?", a: ["3", "2", "1", "4"], correct: 0, difficulty: "MITJA" },
+                { q: "Els alcohols terciaris:", a: ["No s'oxiden fàcilment", "S'oxiden a aldehids", "S'oxiden a cetones", "S'oxiden a àcids"], correct: 0, difficulty: "DIFICIL" },
+                { q: "La deshidratació d'un alcohol produeix:", a: ["Alquè", "Alcà", "Aldehid", "Àcid"], correct: 0, difficulty: "DIFICIL" },
+            ],
+            ETERES: [
+                { q: "Quin grup funcional tenen els èters?", a: ["R-O-R'", "R-OH", "R-CHO", "R-COOH"], correct: 0, difficulty: "FACIL" },
+                { q: "Els èters són compostos amb l'oxigen unit a:", a: ["Dos carbonis", "Un carboni", "Tres carbonis", "Un hidrogen"], correct: 0, difficulty: "FACIL" },
+                { q: "El dimetil èter té la fórmula:", a: ["CH₃-O-CH₃", "C₂H₅-O-C₂H₅", "CH₃OH", "C₂H₅OH"], correct: 0, difficulty: "MITJA" },
+                { q: "Els èters són...", a: ["Menys reactius que alcohols", "Més reactius que alcohols", "Àcids", "Bases"], correct: 0, difficulty: "MITJA" },
+                { q: "Els èters es poden formar per:", a: ["Deshidratació d'alcohols", "Oxidació d'alcohols", "Reducció d'aldehids", "Hidròlisi d'èsters"], correct: 0, difficulty: "DIFICIL" },
+                { q: "El dietil èter és:", a: ["Anestèsic", "Desinfectant", "Àcid", "Base"], correct: 0, difficulty: "MITJA" },
+                { q: "Els èters tenen punt d'ebullició:", a: ["Més baix que alcohols", "Més alt que alcohols", "Igual que alcohols", "Molt alt"], correct: 0, difficulty: "MITJA" },
+                { q: "Els èters són compostos:", a: ["Poc polars", "Molt polars", "Iònics", "Metàl·lics"], correct: 0, difficulty: "DIFICIL" },
+                { q: "La nomenclatura sistemàtica dels èters usa:", a: ["Alcoxi-alcà", "Radicals + èter", "Hidroxi-alcà", "Oxo-alcà"], correct: 0, difficulty: "DIFICIL" },
+                { q: "Els èters reaccionen amb àcids forts formant:", a: ["Sals d'oxoni", "Alcohols", "Aldehids", "Cetones"], correct: 0, difficulty: "DIFICIL" },
+                { q: "El metoxietà és també conegut com:", a: ["Etil metil èter", "Dimetil èter", "Dietil èter", "Metanol"], correct: 0, difficulty: "MITJA" },
+                { q: "Els èters s'utilitzen com a:", a: ["Dissolvents", "Àcids", "Bases", "Combustibles"], correct: 0, difficulty: "FACIL" },
+            ],
+            ALDEHIDS: [
+                { q: "Quin grup funcional tenen els aldehids?", a: ["-CHO", "-OH", "-COOH", "-CO-"], correct: 0, difficulty: "FACIL" },
+                { q: "El metanal (formaldehid) té la fórmula:", a: ["HCHO", "CH₃CHO", "C₂H₅CHO", "CH₃OH"], correct: 0, difficulty: "FACIL" },
+                { q: "Quin és l'aldehid més simple?", a: ["Metanal", "Etanal", "Propanal", "Butanal"], correct: 0, difficulty: "FACIL" },
+                { q: "El formaldehid es fa servir per:", a: ["Conservar", "Cuinar", "Netejar", "Begudes"], correct: 0, difficulty: "FACIL" },
+                { q: "Els aldehids es poden obtenir per:", a: ["Oxidació d'alcohols primaris", "Oxidació d'alcohols secundaris", "Reducció de cetones", "Hidratació d'alcans"], correct: 0, difficulty: "MITJA" },
+                { q: "L'etanal (acetaldehid) té la fórmula:", a: ["CH₃CHO", "HCHO", "C₂H₅CHO", "CH₃COCH₃"], correct: 0, difficulty: "MITJA" },
+                { q: "El grup carbonil dels aldehids està sempre en:", a: ["Carboni terminal", "Carboni central", "Carboni secundari", "Carboni terciari"], correct: 0, difficulty: "DIFICIL" },
+                { q: "El formaldehid s'utilitza en:", a: ["Conservació", "Cuina", "Begudes", "Combustible"], correct: 0, difficulty: "FACIL" },
+                { q: "Els aldehids tenen olor:", a: ["Característica", "Neutra", "Inexistent", "Agradable"], correct: 0, difficulty: "MITJA" },
+                { q: "La reducció d'un aldehid produeix:", a: ["Alcohol primari", "Alcohol secundari", "Cetona", "Àcid"], correct: 0, difficulty: "MITJA" },
+                { q: "Els aldehids es detecten amb el reactiu de:", a: ["Fehling/Tollens", "Lucas", "Bayer", "Molisch"], correct: 0, difficulty: "DIFICIL" },
+                { q: "L'oxidació suau d'un aldehid produeix:", a: ["Àcid carboxílic", "Cetona", "Alcohol", "Èster"], correct: 0, difficulty: "DIFICIL" },
+                { q: "El propanal té quants carbonis?", a: ["3", "2", "4", "5"], correct: 0, difficulty: "FACIL" },
+                { q: "Els aldehids tenen olor:", a: ["Penetrant", "Suau", "Inexistent", "Floral"], correct: 0, difficulty: "MITJA" },
+                { q: "L'aldehid més simple és:", a: ["Metanal", "Etanal", "Propanal", "Butanal"], correct: 0, difficulty: "FACIL" },
+                { q: "El formaldehid en solució aquosa s'anomena:", a: ["Formol", "Acetona", "Alcohol", "Èter"], correct: 0, difficulty: "MITJA" },
+                { q: "Els aldehids aromàtics com el benzaldehid tenen olor:", a: ["D'ametla", "De peix", "De vinagre", "De fruita"], correct: 0, difficulty: "MITJA" },
+                { q: "El butanal té quants carbonis?", a: ["4", "3", "5", "2"], correct: 0, difficulty: "FACIL" },
+            ],
+            CETONES: [
+                { q: "Quin grup funcional tenen les cetones?", a: ["R-CO-R'", "R-CHO", "R-COOH", "R-OH"], correct: 0, difficulty: "FACIL" },
+                { q: "La propanona (acetona) té la fórmula:", a: ["CH₃COCH₃", "CH₃CHO", "HCHO", "C₂H₅COCH₃"], correct: 0, difficulty: "FACIL" },
+                { q: "La cetona més simple és:", a: ["Propanona", "Etanona", "Metanona", "Butanona"], correct: 0, difficulty: "FACIL" },
+                { q: "L'acetona es fa servir com a:", a: ["Dissolvent", "Combustible", "Aliment", "Medicament"], correct: 0, difficulty: "FACIL" },
+                { q: "Les cetones es poden obtenir per:", a: ["Oxidació d'alcohols secundaris", "Oxidació d'alcohols primaris", "Reducció d'aldehids", "Hidratació d'alcans"], correct: 0, difficulty: "MITJA" },
+                { q: "El grup carbonil de les cetones està en:", a: ["Carboni no terminal", "Carboni terminal", "Qualsevol posició", "Només carboni primari"], correct: 0, difficulty: "MITJA" },
+                { q: "Les cetones són menys reactives que els aldehids perquè:", a: ["Tenen dos grups alquil", "Tenen un hidrogen", "Són més petites", "Són més polars"], correct: 0, difficulty: "DIFICIL" },
+                { q: "L'acetona s'utilitza com a:", a: ["Dissolvent", "Combustible", "Aliment", "Medicament"], correct: 0, difficulty: "FACIL" },
+                { q: "La butanona té la fórmula:", a: ["CH₃COC₂H₅", "CH₃COCH₃", "C₂H₅COC₂H₅", "HCHO"], correct: 0, difficulty: "MITJA" },
+                { q: "Les cetones NO es poden oxidar fàcilment a:", a: ["Àcids carboxílics", "Alcohols", "Aldehids", "Èsters"], correct: 0, difficulty: "MITJA" },
+                { q: "La reducció d'una cetona produeix:", a: ["Alcohol secundari", "Alcohol primari", "Aldehid", "Àcid"], correct: 0, difficulty: "DIFICIL" },
+                { q: "Les cetones NO donen positiu amb:", a: ["Reactiu de Tollens", "Reactiu de Brady", "Reactiu 2,4-DNFH", "Iodur"], correct: 0, difficulty: "DIFICIL" },
+                { q: "La pentanona té quants carbonis?", a: ["5", "4", "6", "3"], correct: 0, difficulty: "FACIL" },
+                { q: "Les cetones cícliques com la ciclopentanona són:", a: ["Compostos estables", "Molt inestables", "Àcids", "Bases"], correct: 0, difficulty: "MITJA" },
+            ],
+            ACIDS: [
+                { q: "Quin grup funcional tenen els àcids carboxílics?", a: ["-COOH", "-CHO", "-OH", "-CO-"], correct: 0, difficulty: "FACIL" },
+                { q: "L'àcid metanoic (fòrmic) té la fórmula:", a: ["HCOOH", "CH₃COOH", "C₂H₅COOH", "HCHO"], correct: 0, difficulty: "FACIL" },
+                { q: "L'àcid etanoic (acètic) té la fórmula:", a: ["CH₃COOH", "HCOOH", "C₂H₅COOH", "CH₃CHO"], correct: 0, difficulty: "FACIL" },
+                { q: "Els àcids carboxílics són:", a: ["Àcids febles", "Àcids forts", "Bases febles", "Neutres"], correct: 0, difficulty: "MITJA" },
+                { q: "L'oxidació d'un aldehid produeix:", a: ["Àcid carboxílic", "Cetona", "Alcohol", "Èster"], correct: 0, difficulty: "DIFICIL" },
+            ],
+            ESTERS: [
+                { q: "Quin grup funcional tenen els èsters?", a: ["-COO-", "-COOH", "-CHO", "-OH"], correct: 0, difficulty: "FACIL" },
+                { q: "Els èsters esformen per reacció entre:", a: ["Àcid + Alcohol", "Aldehid + Cetona", "Alcohol + Alcohol", "Àcid + Base"], correct: 0, difficulty: "FACIL" },
+                { q: "L'acetat d'etil té la fórmula:", a: ["CH₃COOC₂H₅", "CH₃COOH", "C₂H₅OH", "CH₃CHO"], correct: 0, difficulty: "MITJA" },
+                { q: "Els èsters són característics per la seva:", a: ["Olor agradable", "Acidesa", "Basicitat", "Toxicitat"], correct: 0, difficulty: "MITJA" },
+                { q: "La hidròlisi d'un èster produeix:", a: ["Àcid + Alcohol", "Aldehid + Cetona", "Dos alcohols", "Dos àcids"], correct: 0, difficulty: "DIFICIL" },
+            ],
+            AMINES: [
+                { q: "Quin grup funcional tenen les amines?", a: ["-NH₂", "-OH", "-CHO", "-COOH"], correct: 0, difficulty: "FACIL" },
+                { q: "Les amines deriven de:", a: ["Amoníac (NH₃)", "Metà (CH₄)", "Aigua (H₂O)", "Àcid sulfúric"], correct: 0, difficulty: "FACIL" },
+                { q: "La metilamina té la fórmula:", a: ["CH₃NH₂", "NH₃", "C₂H₅NH₂", "CH₃OH"], correct: 0, difficulty: "FACIL" },
+                { q: "Les amines primàries tenen:", a: ["Un grup alquil", "Dos grups alquil", "Tres grups alquil", "Cap grup alquil"], correct: 0, difficulty: "MITJA" },
+                { q: "Les amines tenen caràcter:", a: ["Bàsic", "Àcid", "Neutre", "Amfòter"], correct: 0, difficulty: "MITJA" },
+            ],
+            AROMATICS: [
+                { q: "Quin és el compost aromàtic més senzill?", a: ["Benzè (C₆H₆)", "Toluè", "Fenol", "Naftalè"], correct: 0, difficulty: "FACIL" },
+                { q: "Els compostos aromàtics tenen:", a: ["Anell amb electrons deslocalitzats", "Cadena lineal", "Només enllaços simples", "Grup funcional OH"], correct: 0, difficulty: "FACIL" },
+                { q: "El toluè és benzè amb un grup:", a: ["-CH₃ (metil)", "-OH (hidroxil)", "-NH₂ (amino)", "-COOH (carboxil)"], correct: 0, difficulty: "MITJA" },
+                { q: "El fenol és benzè amb un grup:", a: ["-OH (hidroxil)", "-CH₃ (metil)", "-NH₂ (amino)", "-CHO (aldehid)"], correct: 0, difficulty: "MITJA" },
+                { q: "Els compostos aromàtics són especialment estables per:", a: ["Ressonància", "Polaritat", "Massa molecular", "Enllaços iònics"], correct: 0, difficulty: "DIFICIL" },
+            ],
+            CICLICS: [
+                { q: "Els cicloalcans tenen estructura:", a: ["D'anell tancat", "Lineal", "Ramificada", "Aromàtica"], correct: 0, difficulty: "FACIL" },
+                { q: "La fórmula general dels cicloalcans és:", a: ["CₙH₂ₙ", "CₙH₂ₙ₊₂", "CₙH₂ₙ₋₂", "CₙHₙ"], correct: 0, difficulty: "FACIL" },
+                { q: "El ciclopropà té la fórmula:", a: ["C₃H₆", "C₃H₈", "C₃H₄", "C₃H₁₀"], correct: 0, difficulty: "FACIL" },
+                { q: "El ciclohexà té la fórmula:", a: ["C₆H₁₂", "C₆H₆", "C₆H₁₄", "C₆H₁₀"], correct: 0, difficulty: "MITJA" },
+                { q: "Els compostos cíclics amb dobles enllaços es diuen:", a: ["Cicloalquens", "Cicloalcans", "Aromàtics", "Cicloalquins"], correct: 0, difficulty: "DIFICIL" },
+            ] àcides"], correct: 0, difficulty: "DIFICIL" },
+            ],
+            ACIDS: [
+                { q: "Quin grup funcional tenen els àcids carboxílics?", a: ["-COOH", "-CHO", "-OH", "-CO-"], correct: 0, difficulty: "FACIL" },
+                { q: "L'àcid metanoic (fòrmic) té la fórmula:", a: ["HCOOH", "CH₃COOH", "C₂H₅COOH", "CH₃OH"], correct: 0, difficulty: "FACIL" },
+                { q: "L'àcid etanoic (acètic) té la fórmula:", a: ["CH₃COOH", "HCOOH", "C₂H₅COOH", "CH₃CHO"], correct: 0, difficulty: "FACIL" },
+                { q: "L'àcid del vinagre és:", a: ["Àcid etanoic", "Àcid metanoic", "Àcid propanoic", "Àcid butanoic"], correct: 0, difficulty: "FACIL" },
+                { q: "L'àcid fòrmic es troba en:", a: ["Formigues", "Vinagre", "Llet", "Cítrics"], correct: 0, difficulty: "FACIL" },
+                { q: "Els àcids carboxílics són:", a: ["Àcids dèbils", "Àcids forts", "Bases dèbils", "Neutres"], correct: 0, difficulty: "MITJA" },
+                { q: "Els àcids carboxílics es poden obtenir per:", a: ["Oxidació d'alcohols primaris", "Reducció d'aldehids", "Hidratació d'alcans", "Deshidratació d'alcohols"], correct: 0, difficulty: "DIFICIL" },
+                { q: "L'àcid propanoic té quants carbonis?", a: ["3", "2", "4", "5"], correct: 0, difficulty: "FACIL" },
+                { q: "El vinagre conté àcid:", a: ["Etanoic (acètic)", "Metanoic", "Propanoic", "Butanoic"], correct: 0, difficulty: "FACIL" },
+                { q: "Els àcids carboxílics reaccionen amb alcohols per formar:", a: ["Èsters", "Èters", "Aldehids", "Cetones"], correct: 0, difficulty: "MITJA" },
+                { q: "L'àcid fòrmic es troba en:", a: ["Formigues", "Vinagre", "Llet", "Cítrics"], correct: 0, difficulty: "MITJA" },
+                { q: "Els àcids carboxílics tenen pH:", a: ["Àcid (<7)", "Bàsic (>7)", "Neutre (=7)", "Variable"], correct: 0, difficulty: "DIFICIL" },
+                { q: "Els àcids carboxílics de cadena llarga s'anomenen:", a: ["Àcids grassos", "Aminoàcids", "Nucleòtids", "Proteïnes"], correct: 0, difficulty: "MITJA" },
+                { q: "L'àcid butanoic (butíric) té olor de:", a: ["Mantega rància", "Vinagre", "Formigues", "Fruita"], correct: 0, difficulty: "MITJA" },
+                { q: "La sal de sodi de l'àcid etanoic és:", a: ["Acetat de sodi", "Clorur de sodi", "Carbonat de sodi", "Sulfat de sodi"], correct: 0, difficulty: "DIFICIL" },
+            ],
+            ESTERS: [
+                { q: "Quin grup funcional tenen els èsters?", a: ["R-COO-R'", "R-COOH", "R-CHO", "R-OH"], correct: 0, difficulty: "FACIL" },
+                { q: "Els èsters esformen per reacció entre:", a: ["Àcid + Alcohol", "Àcid + Base", "Alcohol + Aldehid", "Cetona + Alcohol"], correct: 0, difficulty: "FACIL" },
+                { q: "L'acetat d'etil té la fórmula:", a: ["CH₃COOC₂H₅", "CH₃COOH", "C₂H₅OH", "CH₃CHO"], correct: 0, difficulty: "MITJA" },
+                { q: "Els èsters tenen generalment:", a: ["Olor agradable", "Olor desagradable", "Cap olor", "Olor àcida"], correct: 0, difficulty: "MITJA" },
+                { q: "La reacció de formació d'un èster s'anomena:", a: ["Esterificació", "Saponificació", "Hidròlisi", "Oxidació"], correct: 0, difficulty: "DIFICIL" },
+                { q: "Els èsters es formen a partir de:", a: ["Àcid + Alcohol", "Aldehid + Cetona", "Alcohol + Èter", "Dos àcids"], correct: 0, difficulty: "FACIL" },
+                { q: "Els èsters són responsables de:", a: ["Olors de fruites", "Acidesa", "Basicitat", "Toxicitat"], correct: 0, difficulty: "FACIL" },
+                { q: "L'hidròlisi d'un èster produeix:", a: ["Àcid + Alcohol", "Aldehid + Cetona", "Dos alcohols", "Dos àcids"], correct: 0, difficulty: "MITJA" },
+                { q: "El formiato d'etil té olor a:", a: ["Rom", "Plàtan", "Pinya", "Vinagre"], correct: 0, difficulty: "DIFICIL" },
+                { q: "L'acetat d'isopentil té olor de:", a: ["Plàtan", "Pinya", "Poma", "Taronja"], correct: 0, difficulty: "MITJA" },
+                { q: "Els èsters són responsables de:", a: ["Aromes de fruites", "Acidesa", "Basicitat", "Color"], correct: 0, difficulty: "FACIL" },
+                { q: "L'hidròlisi bàsica d'un èster s'anomena:", a: ["Saponificació", "Esterificació", "Fermentació", "Oxidació"], correct: 0, difficulty: "DIFICIL" },
+                { q: "El butanoat d'etil té olor de:", a: ["Pinya", "Plàtan", "Poma", "Coco"], correct: 0, difficulty: "MITJA" },
+                { q: "Els èsters de la glicerina amb àcids grassos són:", a: ["Greixos/Olis", "Proteïnes", "Glucosa", "Alcohol"], correct: 0, difficulty: "DIFICIL" },
+            ],
+            AMINES: [
+                { q: "Quin grup funcional tenen les amines?", a: ["-NH₂", "-OH", "-COOH", "-CHO"], correct: 0, difficulty: "FACIL" },
+                { q: "Les amines es poden considerar derivats de:", a: ["Amoníac (NH₃)", "Aigua (H₂O)", "Metà (CH₄)", "Èter"], correct: 0, difficulty: "FACIL" },
+                { q: "Quina fórmula té la metilamina?", a: ["CH₃NH₂", "C₂H₅NH₂", "NH₃", "CH₃OH"], correct: 0, difficulty: "FACIL" },
+                { q: "Les amines tenen caràcter:", a: ["Bàsic", "Àcid", "Neutre", "Anfòter"], correct: 0, difficulty: "FACIL" },
+                { q: "La metilamina té la fórmula:", a: ["CH₃NH₂", "C₂H₅NH₂", "NH₃", "(CH₃)₂NH"], correct: 0, difficulty: "MITJA" },
+                { q: "Les amines primàries tenen:", a: ["Un grup alquil", "Dos grups alquil", "Tres grups alquil", "Cap grup alquil"], correct: 0, difficulty: "MITJA" },
+                { q: "Les amines són compostos:", a: ["Bàsics", "Àcids", "Neutres", "Oxidants"], correct: 0, difficulty: "DIFICIL" },
+                { q: "Les amines secundàries tenen:", a: ["Dos grups alquil", "Un grup alquil", "Tres grups alquil", "Cap grup alquil"], correct: 0, difficulty: "FACIL" },
+                { q: "Les amines tenen olor:", a: ["De peix", "Floral", "Fruital", "Inexistent"], correct: 0, difficulty: "FACIL" },
+                { q: "Les amines deriven de substituir H de:", a: ["Amoníac (NH₃)", "Aigua (H₂O)", "Metà (CH₄)", "Etanol"], correct: 0, difficulty: "MITJA" },
+                { q: "L'anilina és una amina:", a: ["Aromàtica", "Alifàtica", "Cíclica", "Saturada"], correct: 0, difficulty: "DIFICIL" },
+                { q: "Les amines terciàries tenen:", a: ["Tres grups alquil", "Dos grups alquil", "Un grup alquil", "Cap grup alquil"], correct: 0, difficulty: "MITJA" },
+                { q: "La trimetilamina té la fórmula:", a: ["(CH₃)₃N", "CH₃NH₂", "(CH₃)₂NH", "NH₃"], correct: 0, difficulty: "MITJA" },
+                { q: "Les amines reaccionen amb àcids formant:", a: ["Sals d'amoni", "Èsters", "Èters", "Aldehids"], correct: 0, difficulty: "DIFICIL" },
+                { q: "L'anilina (C₆H₅NH₂) s'utilitza en la fabricació de:", a: ["Colorants", "Perfums", "Combustibles", "Plàstics"], correct: 0, difficulty: "MITJA" },
+            ],
+            AROMATICS: [
+                { q: "Quin és el compost aromàtic més simple?", a: ["Benzè (C₆H₆)", "Toluè", "Fenol", "Anilina"], correct: 0, difficulty: "FACIL" },
+                { q: "Els compostos aromàtics contenen:", a: ["Anell benzènic", "Enllaç triple", "Grup hidroxil", "Grup carbonil"], correct: 0, difficulty: "FACIL" },
+                { q: "Quina fórmula té el benzè?", a: ["C₆H₆", "C₆H₁₂", "C₅H₅", "C₇H₈"], correct: 0, difficulty: "FACIL" },
+                { q: "El toluè és benzè amb un grup:", a: ["Metil", "Etil", "Hidroxil", "Amino"], correct: 0, difficulty: "FACIL" },
+                { q: "El toluè és benzè amb un grup:", a: ["Metil (-CH₃)", "Etil (-C₂H₅)", "Hidroxil (-OH)", "Amino (-NH₂)"], correct: 0, difficulty: "MITJA" },
+                { q: "El fenol té la fórmula:", a: ["C₆H₅OH", "C₆H₆", "C₆H₅CH₃", "C₆H₅NH₂"], correct: 0, difficulty: "MITJA" },
+                { q: "Els compostos aromàtics són estables per:", a: ["Ressonància", "Enllaços simples", "Enllaços triples", "Polaritat"], correct: 0, difficulty: "DIFICIL" },
+                { q: "El xilè és benzè amb dos grups:", a: ["Metil", "Etil", "Hidroxil", "Amino"], correct: 0, difficulty: "FACIL" },
+                { q: "El naftalè té quants anells benzènics?", a: ["2", "1", "3", "4"], correct: 0, difficulty: "MITJA" },
+                { q: "Els compostos aromàtics reaccionen per:", a: ["Substitució", "Addició", "Eliminació", "Condensació"], correct: 0, difficulty: "MITJA" },
+                { q: "El TNT (trinitrotoluè) és un compost:", a: ["Aromàtic explosiu", "Alifàtic", "Medicament", "Perfum"], correct: 0, difficulty: "DIFICIL" },
+                { q: "L'àcid benzoic és:", a: ["C₆H₅COOH", "C₆H₅OH", "C₆H₅NH₂", "C₆H₅CH₃"], correct: 0, difficulty: "MITJA" },
+                { q: "El naftalè s'utilitza en:", a: ["Antiarpilles", "Medicaments", "Aliments", "Combustibles"], correct: 0, difficulty: "FACIL" },
+                { q: "Els compostos aromàtics policíclics tenen:", a: ["Múltiples anells fusionats", "Un anell", "Cadena lineal", "Grups funcionals"], correct: 0, difficulty: "DIFICIL" },
+                { q: "L'estirè (vinilbenzè) s'utilitza per fer:", a: ["Poliestirè", "PVC", "Tefló", "Nylon"], correct: 0, difficulty: "MITJA" },
+            ],
+            CICLICS: [
+                { q: "Els hidrocarburs cíclics tenen forma de:", a: ["Anell tancat", "Cadena lineal", "Cadena ramificada", "Estrella"], correct: 0, difficulty: "FACIL" },
+                { q: "El ciclopropà té la fórmula:", a: ["C₃H₆", "C₃H₈", "C₄H₈", "C₅H₁₀"], correct: 0, difficulty: "FACIL" },
+                { q: "Quina fórmula té el ciclobutà?", a: ["C₄H₈", "C₄H₁₀", "C₃H₆", "C₅H₁₀"], correct: 0, difficulty: "FACIL" },
+                { q: "Els cicloalcans tenen enllaços:", a: ["Simples", "Dobles", "Triples", "Aromàtics"], correct: 0, difficulty: "FACIL" },
+                { q: "El ciclohexà té la fórmula:", a: ["C₆H₁₂", "C₆H₆", "C₆H₁₄", "C₅H₁₀"], correct: 0, difficulty: "MITJA" },
+                { q: "Els cicloalcans tenen la fórmula general:", a: ["CₙH₂ₙ", "CₙH₂ₙ₊₂", "CₙH₂ₙ₋₂", "CₙH₂ₙ₋₆"], correct: 0, difficulty: "MITJA" },
+                { q: "El ciclobutà té quants carbonis?", a: ["4", "3", "5", "6"], correct: 0, difficulty: "DIFICIL" },
+                { q: "El ciclopentà té la fórmula:", a: ["C₅H₁₀", "C₅H₈", "C₅H₁₂", "C₆H₁₂"], correct: 0, difficulty: "FACIL" },
+                { q: "Els cicloalcans tenen enllaços:", a: ["Simples", "Dobles", "Triples", "Aromàtics"], correct: 0, difficulty: "FACIL" },
+                { q: "El ciclohexà pot existir en forma de:", a: ["Cadira i barca", "Pla només", "Lineal", "Espiral"], correct: 0, difficulty: "MITJA" },
+                { q: "Els compostos cíclics amb dobles enllaços es diuen:", a: ["Cicloalquens", "Cicloalcans", "Aromàtics", "Cicloalquins"], correct: 0, difficulty: "DIFICIL" },
+                { q: "El ciclopropà és:", a: ["Molt reactiu", "Poc reactiu", "Inert", "Aromàtic"], correct: 0, difficulty: "MITJA" },
+                { q: "El ciclohexà en forma de cadira és:", a: ["Més estable", "Menys estable", "Igual estable", "Inestable"], correct: 0, difficulty: "DIFICIL" },
+                { q: "Els anells de 3 i 4 membres tenen:", a: ["Tensió angular", "Cap tensió", "Màxima estabilitat", "Enllaços dobles"], correct: 0, difficulty: "DIFICIL" },
+            ]
+        };
+
+        function login() {
+            const email = document.getElementById('emailInput').value.trim().toLowerCase();
+            const nickname = document.getElementById('nicknameLoginInput').value.trim();
+
+            if (!email) {
+                playBeep(220, 300);
+                alert('SI US PLAU, INTRODUEIX\nEL TEU EMAIL');
+                return;
+            }
+
+            playBeep(800, 150);
+
+            const users = JSON.parse(localStorage.getItem('quimicaUsers') || '{}');
+            
+            if (users[email]) {
+                gameState.currentUser = users[email];
+                gameState.currentUser.gamesPlayed++;
+                localStorage.setItem('quimicaUsers', JSON.stringify(users));
+            } else {
+                if (!nickname) {
+                    playBeep(220, 300);
+                    alert('PRIMER ACCÉS\nSI US PLAU, INTRODUEIX\nEL TEU NICKNAME');
+                    return;
+                }
+                gameState.currentUser = {
+                    email: email,
+                    nickname: nickname,
+                    gamesPlayed: 1,
+                    bestScore: 0,
+                    registeredDate: new Date().toISOString()
+                };
+                users[email] = gameState.currentUser;
+                localStorage.setItem('quimicaUsers', JSON.stringify(users));
+            }
+
+            document.getElementById('loginScreen').classList.add('hidden');
+            
+            if (email === ADMIN_EMAIL) {
+                document.getElementById('homeButton').style.display = 'block';
+                showAdminPanel();
+            } else {
+                document.getElementById('splashScreen').classList.remove('hidden');
+                document.getElementById('homeButton').style.display = 'block';
+                loadTopScores();
+            }
+        }
+
+        function logout() {
+            playBeep(392, 100);
+            gameState.currentUser = null;
+            document.getElementById('splashScreen').classList.add('hidden');
+            document.getElementById('setupScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('resultsScreen').classList.add('hidden');
+            document.getElementById('adminScreen').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('homeButton').style.display = 'none';
+            document.getElementById('emailInput').value = '';
+            document.getElementById('nicknameLoginInput').value = '';
+        }
+
+        function goHome() {
+            playBeep(523, 100);
+            document.getElementById('setupScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('resultsScreen').classList.add('hidden');
+            document.getElementById('adminScreen').classList.add('hidden');
+            document.getElementById('splashScreen').classList.remove('hidden');
+            loadTopScores();
+        }
+
+        function showTheory() {
+            playBeep(784, 150);
+            document.getElementById('splashScreen').classList.add('hidden');
+            document.getElementById('theoryScreen').classList.remove('hidden');
+            document.getElementById('homeButton').style.display = 'block';
+        }
+
+        function showAdminPanel() {
+            playBeep(880, 150);
+            document.getElementById('splashScreen').classList.add('hidden');
+            document.getElementById('adminScreen').classList.remove('hidden');
+            document.getElementById('homeButton').style.display = 'block';
+            
+            const users = JSON.parse(localStorage.getItem('quimicaUsers') || '{}');
+            const tbody = document.getElementById('userStatsBody');
+            
+            tbody.innerHTML = Object.values(users)
+                .sort((a, b) => b.bestScore - a.bestScore)
+                .map(user => `
+                    <tr>
+                        <td>${user.email}</td>
+                        <td>${user.nickname}</td>
+                        <td>${user.gamesPlayed}</td>
+                        <td>${user.bestScore}</td>
+                        <td>${new Date(user.registeredDate).toLocaleDateString('ca-ES')}</td>
+                    </tr>
+                `).join('');
+        }
+
+        function goToSetup() {
+            playBeep(523, 100);
+            document.getElementById('splashScreen').classList.add('hidden');
+            document.getElementById('setupScreen').classList.remove('hidden');
+        }
+
+        function backToSplash() {
+            playBeep(392, 100);
+            if (gameState.currentUser && gameState.currentUser.email === ADMIN_EMAIL) {
+                document.getElementById('adminScreen').classList.remove('hidden');
+                document.getElementById('setupScreen').classList.add('hidden');
+                document.getElementById('gameScreen').classList.add('hidden');
+                document.getElementById('resultsScreen').classList.add('hidden');
+                document.getElementById('splashScreen').classList.add('hidden');
+                document.getElementById('theoryScreen').classList.add('hidden');
+            } else {
+                document.getElementById('splashScreen').classList.remove('hidden');
+                document.getElementById('setupScreen').classList.add('hidden');
+                document.getElementById('gameScreen').classList.add('hidden');
+                document.getElementById('resultsScreen').classList.add('hidden');
+                document.getElementById('adminScreen').classList.add('hidden');
+                document.getElementById('theoryScreen').classList.add('hidden');
+                loadTopScores();
+            }
+        }
+
+        function toggleCategory(btn) {
+            playBeep(659, 50);
+            btn.classList.toggle('selected');
+        }
+
+        function selectAllCategories() {
+            playBeep(784, 100);
+            const buttons = document.querySelectorAll('.category-btn');
+            buttons.forEach(btn => btn.classList.add('selected'));
+        }
+
+        function selectDifficulty(btn) {
+            playBeep(523, 80);
+            const parent = btn.parentElement;
+            parent.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            gameState.difficulty = btn.dataset.difficulty;
+        }
+
+        function selectQuestions(btn) {
+            playBeep(523, 80);
+            const parent = btn.parentElement;
+            parent.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            gameState.questionCount = parseInt(btn.dataset.count);
+        }
+
+        function startGame() {
+            const selectedCategories = document.querySelectorAll('.category-btn.selected');
+            if (selectedCategories.length === 0) {
+                playBeep(220, 300);
+                alert('SI US PLAU, SELECCIONA\nALMENYS UNA CATEGORIA');
+                return;
+            }
+
+            gameState.selectedCategories = Array.from(selectedCategories).map(btn => btn.dataset.category);
+            gameState.currentQuestionIndex = 0;
+            gameState.score = 0;
+            gameState.correctAnswers = 0;
+            gameState.incorrectAnswers = 0;
+            gameState.lives = 3;
+
+            const allQuestions = [];
+            gameState.selectedCategories.forEach(cat => {
+                const catQuestions = questionsDB[cat].filter(q => 
+                    gameState.difficulty === 'FACIL' ? q.difficulty === 'FACIL' :
+                    gameState.difficulty === 'MITJA' ? q.difficulty !== 'DIFICIL' :
+                    true
+                );
+                allQuestions.push(...catQuestions);
+            });
+
+            gameState.questions = allQuestions.sort(() => Math.random() - 0.5).slice(0, gameState.questionCount);
+
+            playBeep(1047, 200);
+            setTimeout(() => playBeep(1319, 200), 200);
+
+            document.getElementById('setupScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            const question = gameState.questions[gameState.currentQuestionIndex];
+            
+            document.getElementById('currentQuestion').textContent = gameState.currentQuestionIndex + 1;
+            document.getElementById('totalQuestions').textContent = gameState.questions.length;
+            document.getElementById('currentScore').textContent = gameState.score;
+            document.getElementById('questionText').textContent = question.q;
+            
+            const optionsGrid = document.getElementById('optionsGrid');
+            optionsGrid.innerHTML = '';
+            
+            question.a.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = option;
+                btn.onclick = () => selectAnswer(index);
+                optionsGrid.appendChild(btn);
+            });
+
+            document.getElementById('feedbackBox').classList.add('hidden');
+            document.getElementById('nextButton').style.display = 'none';
+            
+            updateLivesDisplay();
+            startTimer();
+        }
+
+        function updateLivesDisplay() {
+            const hearts = '❤️'.repeat(gameState.lives) + '🖤'.repeat(3 - gameState.lives);
+            document.getElementById('livesDisplay').textContent = hearts;
+        }
+
+        function startTimer() {
+            clearInterval(gameState.timer);
+            gameState.timeLeft = gameState.difficulty === 'FACIL' ? 45 : gameState.difficulty === 'MITJA' ? 30 : 20;
+            document.getElementById('timer').textContent = gameState.timeLeft;
+
+            gameState.timer = setInterval(() => {
+                gameState.timeLeft--;
+                document.getElementById('timer').textContent = gameState.timeLeft;
+                
+                if (gameState.timeLeft <= 5) {
+                    playBeep(880, 50);
+                }
+
+                if (gameState.timeLeft <= 0) {
+                    clearInterval(gameState.timer);
+                    selectAnswer(-1);
+                }
+            }, 1000);
+        }
+
+        function selectAnswer(selectedIndex) {
+            clearInterval(gameState.timer);
+            const question = gameState.questions[gameState.currentQuestionIndex];
+            const optionBtns = document.querySelectorAll('.option-btn');
+            
+            optionBtns.forEach(btn => btn.disabled = true);
+
+            if (selectedIndex === question.correct) {
+                playBeep(800, 200);
+                setTimeout(() => playBeep(1000, 200), 150);
+                
+                optionBtns[selectedIndex].classList.add('correct');
+                const timeBonus = Math.floor(gameState.timeLeft / 2);
+                const points = 10 + timeBonus;
+                gameState.score += points;
+                gameState.correctAnswers++;
+                
+                document.getElementById('feedbackBox').innerHTML = `✅ CORRECTE! +${points} punts`;
+                document.getElementById('feedbackBox').classList.remove('hidden');
+            } else {
+                playBeep(200, 300);
+                
+                if (selectedIndex >= 0) {
+                    optionBtns[selectedIndex].classList.add('incorrect');
+                }
+                optionBtns[question.correct].classList.add('correct');
+                gameState.incorrectAnswers++;
+                gameState.lives--;
+                updateLivesDisplay();
+                
+                if (gameState.lives <= 0) {
+                    document.getElementById('feedbackBox').innerHTML = `💀 GAME OVER!<br>Has perdut totes les vides`;
+                    document.getElementById('feedbackBox').classList.remove('hidden');
+                    document.getElementById('nextButton').style.display = 'none';
+                    setTimeout(() => showResults(), 3000);
+                    return;
+                }
+                
+                document.getElementById('feedbackBox').innerHTML = `❌ INCORRECTE (-1 VIDA)<br>La resposta correcta era: ${question.a[question.correct]}`;
+                document.getElementById('feedbackBox').classList.remove('hidden');
+            }
+
+            document.getElementById('currentScore').textContent = gameState.score;
+            document.getElementById('nextButton').style.display = 'block';
+        }
+
+        function nextQuestion() {
+            playBeep(523, 100);
+            gameState.currentQuestionIndex++;
+
+            if (gameState.currentQuestionIndex < gameState.questions.length) {
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            playBeep(1047, 300);
+            
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('resultsScreen').classList.remove('hidden');
+
+            document.getElementById('finalScore').textContent = gameState.score + ' PUNTS';
+            document.getElementById('correctCount').textContent = gameState.correctAnswers;
+            document.getElementById('incorrectCount').textContent = gameState.incorrectAnswers;
+            
+            const accuracy = Math.round((gameState.correctAnswers / gameState.questions.length) * 100);
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+
+        function saveScore() {
+            const nickname = document.getElementById('nicknameInput').value.trim();
+            
+            if (!nickname) {
+                playBeep(220, 300);
+                alert('SI US PLAU, ESCRIU EL TEU NOM');
+                return;
+            }
+
+            playBeep(800, 150);
+            setTimeout(() => playBeep(1000, 150), 150);
+
+            const scores = JSON.parse(localStorage.getItem('quimicaScores') || '[]');
+            scores.push({
+                nickname: nickname,
+                score: gameState.score,
+                date: new Date().toISOString()
+            });
+            
+            scores.sort((a, b) => b.score - a.score);
+            localStorage.setItem('quimicaScores', JSON.stringify(scores.slice(0, 50)));
+
+            if (gameState.currentUser) {
+                const users = JSON.parse(localStorage.getItem('quimicaUsers') || '{}');
+                if (gameState.score > gameState.currentUser.bestScore) {
+                    gameState.currentUser.bestScore = gameState.score;
+                    users[gameState.currentUser.email] = gameState.currentUser;
+                    localStorage.setItem('quimicaUsers', JSON.stringify(users));
+                }
+            }
+
+            alert('✅ PUNTUACIO GUARDADA!');
+            backToSplash();
+        }
+
+        function loadTopScores() {
+            const scores = JSON.parse(localStorage.getItem('quimicaScores') || '[]');
+            const scoresList = document.getElementById('scoresList');
+
+            if (scores.length === 0) {
+                scoresList.innerHTML = '<p class="no-scores">ENCARA NO HI HA PUNTUACIONS</p>';
+            } else {
+                scoresList.innerHTML = scores.slice(0, 5).map((user, index) => `
+                    <div class="score-item">
+                        <span class="score-name">${index + 1}. ${user.nickname}</span>
+                        <span class="score-points">${user.score} PTS</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function showScores() {
+            playBeep(880, 150);
+            const scores = JSON.parse(localStorage.getItem('quimicaScores') || '[]');
+            
+            if (scores.length === 0) {
+                alert('ENCARA NO HI HA PUNTUACIONS\n\nJUGA UNA PARTIDA PER APAREIXER\nAL RANKING!');
+            } else {
+                let message = '🏆 RANKING COMPLET 🏆\n\n';
+                scores.slice(0, 10).forEach((s, i) => {
+                    message += `${i + 1}. ${s.nickname} - ${s.score} pts\n`;
+                });
+                alert(message);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const allButtons = document.querySelectorAll('button');
+            allButtons.forEach(btn => {
+                btn.addEventListener('mouseenter', () => {
+                    playBeep(800, 30);
+                });
+            });
+
+            const savedEmail = localStorage.getItem('lastEmail');
+            if (savedEmail) {
+                document.getElementById('emailInput').value = savedEmail;
+            }
+        });
+
+        document.getElementById('emailInput').addEventListener('change', (e) => {
+            localStorage.setItem('lastEmail', e.target.value);
+        });
+    </script>
+</body>
+</html>
+
